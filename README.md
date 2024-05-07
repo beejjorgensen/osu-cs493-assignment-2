@@ -181,6 +181,31 @@ repo to make sure your files are submitted there.
 
 ## Grading criteria
 
+In order to receive a grade, the following needs to work:
+
+1. Open a new shell, change to the project directory, and export
+   necessary environment variables.
+2. In that shell, run `docker compose up`.
+3. Wait for the app to come up.
+4. Open another shell, change to the project directory, and export
+   necessary environment variables.
+5. In that shell, run `sh ./runtests.sh`.
+
+If you have your own cURL tests, you can put them in `runtests.sh`. If
+you are using the supplied Postman tests, put this in your
+`runtests.sh`:
+
+```
+cd tests
+newman run -e api_tests.postman_environment.json api_tests.postman_collection.json
+```
+
+(And if you install [`newman`](https://github.com/postmanlabs/newman),
+it should run the tests.)
+
+If the steps above fail to appreciably complete, I'll let you know and
+you can fix it so I can grade it.
+
 This assignment is worth 100 total points, broken down as follows:
 
   * 20 points: chosen database runs in a Docker container that is
