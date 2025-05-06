@@ -179,7 +179,9 @@ Make sure your completed files are committed and pushed by the
 assignment's deadline to the main branch of your GitHub repo. Check your
 repo to make sure your files are submitted there.
 
-**Add your `.env` file as a comment to your submission.**
+**Add your `.env` file as a comment to your submission.** If you're not
+using a `.env` file, you need to tell me which environment variables to
+set.
 
 ## Grading criteria
 
