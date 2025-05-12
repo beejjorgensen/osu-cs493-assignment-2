@@ -52,6 +52,24 @@ data.  Use the mechanisms described below to initialize your database
 when you launch the database container, so the database is ready to use
 when you launch your app.
 
+Two different approaches to this are:
+
+* Have the app initialize the DB when it starts up. (More hackish.)
+* Have a separate script that initializes the database. (More correct
+  and proper.)
+
+If you have a separate script, you should launch it as a service in your
+`compose.yml`. So in that case, the `compose.yml` will:
+
+* Launch the app if the init script has completed.
+* Launch the init script if the database has started.
+* Launch the database.
+
+Use a health check to see if the database has started. And the app can
+tell if the init script has completed with the
+[`service_completed_successfully`](https://docs.docker.com/compose/how-tos/startup-order/)
+condition.
+
 ### MySQL
 
 If you're using MySQL, you should make sure to set the following
