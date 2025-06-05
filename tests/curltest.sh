@@ -1,3 +1,9 @@
+clean() {
+    rm -f "$tempfile"
+}
+
+trap clean EXIT
+
 default_content_type=""
 default_expected_code=""
 default_method=GET
@@ -37,11 +43,12 @@ def extract($key):
 extract($key)
 '
 
-clean() {
-    rm -f "$tempfile"
+require_jq() {
+    if [ $hasjq -eq 0 ]; then
+        warning "jq is required--install it before running tests"
+        exit 1
+    fi
 }
-
-trap clean EXIT
 
 warning() {
     printf "%s%s: %s%s\n" "$CT_RED" "$(basename $0)" "$*" "$CT_RESET" 1>&2
@@ -117,7 +124,10 @@ extract_field() {
     if [ $hasjq -eq 1 ]; then
         jq -r --arg key "$json_field" "$jq_extract" < "$tempfile"
     else
-        awk -F"\"${json_field}\":\"" '{print $2}' "$tempfile" | awk -F'"' '{print $1}'
+        sed -n 's/.*"'$json_field'":"*\([^,}"]*\).*/\1/p' "$tempfile"|
+            sed 's/^ *//' |
+            sed 's/ *$//' | head -n 1
+        #awk -F"\"${json_field}\":\"" '{print $2}' "$tempfile" | awk -F'"' '{print $1}'
     fi
 }
 
@@ -275,7 +285,7 @@ request() {
     test "$content_type" = "application/json" && json_test_flag="-j"
 
     if [ \( ! -z "$verbose" -o $default_verbose -eq 1 \) -a ! -z "$request" ]; then
-        printf " REQUEST: "
+        printf "REQUEST: "
         if [ $hasjq -ne 0 ]; then
             jq_ppc "$payload"
         else

@@ -2,13 +2,15 @@
 
 . ./curltest.sh
 
+require_jq    # These tests assume jq is installed
+
 test -f ../.env && . ../.env
 
 default_content_type="application/json"
 
 default_base_url="http://localhost:$PORT"
 
-default_verbose=0
+default_verbose=1
 
 status "Testing Businesses"
 
