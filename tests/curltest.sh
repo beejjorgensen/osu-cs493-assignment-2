@@ -301,6 +301,7 @@ request() {
 
     if [ $? -ne 0 ]; then
         warning "curl failed--is the server running?"
+        exit 2
     fi
 
     test ! -z "$verbose" -o $default_verbose -eq 1 && display_response $http_status
