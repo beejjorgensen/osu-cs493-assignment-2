@@ -43,6 +43,24 @@ def extract($key):
 extract($key)
 '
 
+dotenv() {
+    if [ $# -gt 0 ]; then
+        if [ -f "$1" ]; then
+            . "$1"
+            return 0
+        fi
+    else
+        for f in .env ../.env ../../../.env; do
+            if [ -f "$f" ]; then
+                . "$f"
+                return 0
+            fi
+        done
+    fi
+
+    warning dotenv: could not locate .env
+}
+
 require_jq() {
     if [ $hasjq -eq 0 ]; then
         warning "jq is required--install it before running tests"
@@ -52,6 +70,10 @@ require_jq() {
 
 warning() {
     printf "%s%s: %s%s\n" "$CT_RED" "$(basename $0)" "$*" "$CT_RESET" 1>&2
+}
+
+info() {
+    printf "ⓘ %s\n" "$*" 1>&2
 }
 
 jq_pp_internal() {
@@ -213,16 +235,12 @@ request() {
 
     while [ $# -gt 0 ]; do
         case "$1" in
-            -l|--log-message)
+            -l|--log*-message)
                 log_message="$2"
                 shift
                 ;;
             -m|--method)
                 method="$2"
-                shift
-                ;;
-            -u|--url)
-                url="$2"
                 shift
                 ;;
             -c|--content-type)
@@ -241,14 +259,26 @@ request() {
                 expected_response="$2"
                 shift
                 ;;
-            -v|--verbose)
+            -v|--verbose|--i-want-more-output-pretty-please)
                 verbose=1
                 ;;
-            *)
+            -*)
                 warning request: unrecognized option $1
+                ;;
+            *)
+                if [ -z "$url" ]; then
+                    url="$1"
+                else
+                    warning request: already specified URL
+                fi
         esac
         shift
     done
+
+    if [ -z "$url" ]; then
+        warning usage: request url [options]
+        return 1
+    fi
 
     if [ -z "$method" ]; then
         if [ -z "$payload" ]; then
