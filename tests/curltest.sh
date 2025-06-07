@@ -31,6 +31,29 @@ fi
 
 tempfile="curltest.curl.tmp.$$.out"
 
+jq_contains_deep='
+def contains_deep(actual; expected):
+    actual as $ta | expected as $te |
+    if ($ta | type == "string") then
+        if (($te | .[0:7]) == "[REGEX]") then
+            [$ta | test($te | .[7:])]  # regex
+        else
+            [($te == "[ANY]" or $ta == $te)]  # number, boolean, or null
+        end
+    elif (($ta | type == "array") or ($ta | type == "object")) then
+        if ($te == "[ANY]") then
+            [true]
+        else
+            ($te | keys | map(contains_deep($ta[.]; $te[.])))
+        end
+    else
+        [($te == "[ANY]" or $ta == $te)]  # number, boolean, or null
+    end
+    | flatten | all;
+
+contains_deep($actual; $expected)
+'
+
 jq_extract='
 def extract($key):
   . as $in
@@ -118,6 +141,7 @@ rep_chars() {
 }
 
 status() {
+    #echo $*; return
     local cols=$(tput cols)
     local reps=$(($cols - 1))
     local topline=$(rep_chars ═ $reps)
@@ -177,15 +201,12 @@ test_expected () {
         return 0
     fi
 
-    if [ $hasjq -ne 1 ]; then
-        #warning "jq not found; attempting plain text match"
-        :
-    fi
-
     if [ $hasjq -eq 1 -a $json_compare -ne 0 ]; then
         # JSON compare
-        #jq -e --argjson expected "$expected" "$jq_matcher" < "$actualfile" > /dev/null
-        test $(jq 'contains('"$expected"')' "$actualfile") = "true"
+        jq -n -e \
+            --argjson actual "$(cat $actualfile)" \
+            --argjson expected "$expected" \
+            "$jq_contains_deep" > /dev/null
     else
         # Plain text compare
         printf "%s" "$expected" | diff -q -b - "$actualfile" > /dev/null

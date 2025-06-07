@@ -11,14 +11,14 @@ PORT=${PORT:-8000}  # Use port 8000 unless PORT env var specified
 default_content_type="application/json"
 default_base_url="http://localhost:$PORT"
 
-default_verbose=1
+#default_verbose=1
 
 status "Testing Businesses"
 
 request "/businesses" \
     -l "Searching for all businessess" \
     --expect-code 200 \
-    --expect-response '{}'
+    --expect-response '{"businesses":[{"id":0,"ownerid":0,"name":"Block 15","address":"300 SW Jefferson Ave.","city":"Corvallis","state":"OR","zip":"97333","phone":"541-758-2077","category":"Restaurant","subcategory":"Brewpub","website":"http://block15.com"},{"id":1,"ownerid":1,"name":"Corvallis Brewing Supply","address":"119 SW 4th St.","city":"Corvallis","state":"OR","zip":"97333","phone":"541-758-1674","category":"Shopping","subcategory":"Brewing Supply","website":"http://www.lickspigot.com"},{"id":2,"ownerid":2,"name":"Robnett'\''s Hardware","address":"400 SW 2nd St.","city":"Corvallis","state":"OR","zip":"97333","phone":"541-753-5531","category":"Shopping","subcategory":"Hardware"},{"id":3,"ownerid":3,"name":"First Alternative Co-op North Store","address":"2855 NW Grant Ave.","city":"Corvallis","state":"OR","zip":"97330","phone":"541-452-3115","category":"Shopping","subcategory":"Groceries"},{"id":4,"ownerid":4,"name":"WinCo Foods","address":"2335 NW Kings Blvd.","city":"Corvallis","state":"OR","zip":"97330","phone":"541-753-7002","category":"Shopping","subcategory":"Groceries"},{"id":5,"ownerid":5,"name":"Fred Meyer","address":"777 NW Kings Blvd.","city":"Corvallis","state":"OR","zip":"97330","phone":"541-753-9116","category":"Shopping","subcategory":"Groceries"},{"id":6,"ownerid":6,"name":"Interzone","address":"1563 NW Monroe Ave.","city":"Corvallis","state":"OR","zip":"97330","phone":"541-754-5965","category":"Restaurant","subcategory":"Coffee Shop"},{"id":7,"ownerid":7,"name":"The Beanery Downtown","address":"500 SW 2nd St.","city":"Corvallis","state":"OR","zip":"97333","phone":"541-753-7442","category":"Restaurant","subcategory":"Coffee Shop"},{"id":8,"ownerid":8,"name":"Local Boyz","address":"1425 NW Monroe Ave.","city":"Corvallis","state":"OR","zip":"97330","phone":"541-754-5338","category":"Restaurant","subcategory":"Hawaiian"},{"id":9,"ownerid":9,"name":"Darkside Cinema","address":"215 SW 4th St.","city":"Corvallis","state":"OR","zip":"97333","phone":"541-752-4161","category":"Entertainment","subcategory":"Movie Theater","website":"http://darksidecinema.com"}],"pageNumber":1,"totalPages":"[ANY]","pageSize":10,"totalCount":"[ANY]","links":{"nextPage":"[REGEX]/businesses\\?page=.*","lastPage":"[REGEX]/businesses\\?page=.*"}}'
 
 request "/businesses" \
     -l "Posting a new business" \
