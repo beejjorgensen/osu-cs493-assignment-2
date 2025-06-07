@@ -9,6 +9,9 @@ default_expected_code=""
 default_method=GET
 default_verbose=0
 
+total_tests=0
+total_passing=0
+
 if command -v tput > /dev/null; then
     CT_YELLOW=$(tput setaf 3; tput bold)
     CT_WHITE=$(tput setaf 7; tput bold)
@@ -212,8 +215,11 @@ test_expected () {
         printf "%s" "$expected" | diff -q -b - "$actualfile" > /dev/null
     fi
 
+    total_tests=$(($total_tests + 1))
+
     if [ $? -eq 0 ]; then
         printf "%s✓ PASS: correct response%s\n" "$CT_GREEN" "$CT_RESET"
+        total_passing=$(($total_passing + 1))
         return 0
     else
         printf "%s! FAIL: expected %s, got %s %s\n" "$CT_RED" "$expected" "$(cat $tempfile)" "$CT_RESET"
@@ -229,8 +235,11 @@ test_code() {
         return 0
     fi
 
+    total_tests=$(($total_tests + 1))
+
     if [ "$actual" -eq "$expected" ]; then
         printf "%s✓ PASS: status %s%s\n" "$CT_GREEN" "$actual" "$CT_RESET"
+        total_passing=$(($total_passing + 1))
         return 0
     else
         printf "%s✖ FAIL: expected status %s, got %s%s\n" "$CT_RED" "$expected" "$actual" "$CT_RESET"
@@ -252,7 +261,7 @@ request() {
     local content_type="$default_content_type"
     local expected_code="$default_expected_code"
 
-    local json_test_flag contentarg payloadarg verbose
+    local json_test_flag methodarg contentarg payloadarg verbose
 
     while [ $# -gt 0 ]; do
         case "$1" in
@@ -361,3 +370,24 @@ request() {
     test ! -z "$expected_response" && test_expected $json_test_flag "$expected_response" "$tempfile"
 }
 
+summary() {
+    local pct color
+
+    status "Summary"
+
+    printf "    Total tests: %d\n" "$total_tests"
+    printf "  Passing tests: %d\n" "$total_passing"
+
+    pct=$((100 * $total_passing / $total_tests))
+    int_pct=$(printf "%d" "$pct")
+
+    if [ $int_pct -lt 90 ]; then
+        color="$CT_RED"
+    elif [ $int_pct -ge 90 -a $int_pct -lt 100 ]; then
+        color="$CT_YELLOW"
+    else
+        color="$CT_GREEN"
+    fi
+
+    printf "                 %s%d%%%s\n" "$color" "$int_pct" "$CT_RESET"
+}
