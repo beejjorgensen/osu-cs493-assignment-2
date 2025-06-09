@@ -257,14 +257,19 @@ display_response() {
 }
 
 request() {
-    local log_message url payload expected_response method
+    local log_message url payload expected_response method token
     local content_type="$default_content_type"
     local expected_code="$default_expected_code"
 
     local json_test_flag methodarg contentarg payloadarg verbose
+    local autharg
 
     while [ $# -gt 0 ]; do
         case "$1" in
+            -a|--auth*)
+                token="$2"
+                shift
+                ;;
             -l|--log*-message)
                 log_message="$2"
                 shift
@@ -353,7 +358,11 @@ request() {
         fi
     fi
 
-    cmd="curl -s $methodarg $contentarg $payloadarg '$url' -o '$tempfile' -w '%{http_code}'"
+    if [ ! -z "$token" ]; then
+        autharg="-H 'Authorization: Bearer ${token}'"
+    fi
+
+    cmd="curl -s $autharg $methodarg $contentarg $payloadarg '$url' -o '$tempfile' -w '%{http_code}'"
     #echo ==============================
     #echo $cmd
     #echo ==============================
